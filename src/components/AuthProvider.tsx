@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase, UserRole, Profile, getCurrentUserProfile } from '@/lib/supabase';
 import { toast } from '@/components/ui/use-toast';
 
@@ -17,6 +17,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<Profile | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Check for existing session
@@ -24,6 +25,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const profile = await getCurrentUserProfile();
         setUser(profile);
+        
+        // If user is logged in and on the login page, redirect to dashboard
+        if (profile && (location.pathname === '/login' || location.pathname === '/')) {
+          navigate('/dashboard', { replace: true });
+        }
       } catch (error) {
         console.error('Error checking auth session:', error);
       } finally {
@@ -38,6 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (event === 'SIGNED_IN' && session) {
         const profile = await getCurrentUserProfile();
         setUser(profile);
+        
+        // Redirect to dashboard on sign in
+        navigate('/dashboard', { replace: true });
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         navigate('/login', { replace: true });
@@ -47,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       authListener?.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   const signIn = async (email: string, password: string) => {
     setIsLoading(true);
@@ -64,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         description: "You've been successfully signed in.",
       });
       
-      navigate('/dashboard');
+      // Redirect will be handled by the auth state change listener
     } catch (error: any) {
       toast({
         title: "Authentication error",
@@ -82,12 +91,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await supabase.auth.signOut();
       setUser(null);
-      navigate('/login', { replace: true });
       
       toast({
         title: "Signed out",
         description: "You've been successfully signed out.",
       });
+      
+      // Redirect will be handled by the auth state change listener
     } catch (error: any) {
       toast({
         title: "Error signing out",
