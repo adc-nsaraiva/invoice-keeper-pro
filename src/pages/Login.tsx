@@ -9,10 +9,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/lib/supabase';
+import { signInWithEmail } from '@/lib/supabase';
 
 const Login = () => {
-  const { isLoading, signIn, user } = useAuth();
+  const { isLoading, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
@@ -32,31 +32,30 @@ const Login = () => {
     setErrorMessage('');
     
     try {
-      // Direct authentication attempt for debugging
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await signInWithEmail(email, password);
       
       if (error) {
-        console.error('Direct login error:', error);
+        console.error('Login error:', error);
         setErrorMessage(error.message);
         toast({
           title: "Authentication error",
           description: error.message || "Failed to sign in",
           variant: "destructive",
         });
-        throw error;
-      }
-      
-      if (data?.user) {
+      } else {
         toast({
           title: "Welcome back!",
           description: "You've been successfully signed in.",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      setErrorMessage(error?.message || 'An unexpected error occurred');
+      toast({
+        title: "Authentication error",
+        description: error?.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
     } finally {
       setLoggingIn(false);
     }
