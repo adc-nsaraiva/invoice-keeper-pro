@@ -8,12 +8,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/lib/supabase';
 
 const Login = () => {
   const { isLoading, signIn, user } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   // If user is already logged in, redirect to dashboard
   if (user && !isLoading) {
@@ -26,8 +29,32 @@ const Login = () => {
     if (!email || !password) return;
     
     setLoggingIn(true);
+    setErrorMessage('');
+    
     try {
-      await signIn(email, password);
+      // Direct authentication attempt for debugging
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        console.error('Direct login error:', error);
+        setErrorMessage(error.message);
+        toast({
+          title: "Authentication error",
+          description: error.message || "Failed to sign in",
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
+      if (data?.user) {
+        toast({
+          title: "Welcome back!",
+          description: "You've been successfully signed in.",
+        });
+      }
     } catch (error) {
       console.error('Login error:', error);
     } finally {
@@ -57,6 +84,11 @@ const Login = () => {
             <CardDescription className="text-center">
               Enter your credentials to access your account
             </CardDescription>
+            {errorMessage && (
+              <div className="p-2 text-sm text-red-500 bg-red-50 rounded-md">
+                {errorMessage}
+              </div>
+            )}
           </CardHeader>
           
           <form onSubmit={handleSubmit}>

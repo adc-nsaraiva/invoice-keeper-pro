@@ -5,7 +5,13 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = 'https://ztswxqvquaxypxfzkwey.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0c3d4cXZxdWF4eXB4Znprd2V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0MDYwMzIsImV4cCI6MjA1Nzk4MjAzMn0.sI0tqNiLd8X9exsw5ExshGeWmq4Rh9MaUF8jCYFI1oY';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    storage: localStorage
+  }
+});
 
 export type UserRole = 'manager' | 'freelancer' | 'finance';
 
