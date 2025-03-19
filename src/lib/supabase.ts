@@ -1,9 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Your Supabase URL and public anon key (safe to use in browser)
-const supabaseUrl = 'https://YOUR_SUPABASE_URL.supabase.co';
-const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+// Using the correct Supabase URL and public anon key from src/integrations/supabase/client.ts
+const supabaseUrl = 'https://ztswxqvquaxypxfzkwey.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0c3d4cXZxdWF4eXB4Znprd2V5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0MDYwMzIsImV4cCI6MjA1Nzk4MjAzMn0.sI0tqNiLd8X9exsw5ExshGeWmq4Rh9MaUF8jCYFI1oY';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
